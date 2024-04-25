@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Alert, Modal, StyleSheet, Text, Pressable, View, Image} from 'react-native';
+import {Alert, Modal, StyleSheet, Text, Pressable, View, Image, TouchableOpacity} from 'react-native';
 import { useNavigation } from 'expo-router';
 
 
@@ -9,9 +9,11 @@ const UserSignModal = ({props}: {props: any} ) => {
 
   const isVisible = props.userSignModalIsVisible;
   const setIsVisible = props.setUserSignModalVisible;
+  const location = props.location;
 
   const signIn = () => {
     console.log("sign in");
+    console.log(location);
     setIsVisible(false);
 
     navigation.navigate('Login',{data:' '})
@@ -19,8 +21,15 @@ const UserSignModal = ({props}: {props: any} ) => {
 
     const closeModal = () => {
       console.log("close");
+      console.log(location);
+
       setIsVisible(false);
       
+    }
+
+    const wholeModal = () => {
+      console.log("whole modal");
+      setIsVisible(false);
     }
   return (
     
@@ -29,15 +38,15 @@ const UserSignModal = ({props}: {props: any} ) => {
         onLayout={()=>console.log("layout")}
         transparent={true}
         visible={isVisible}
-        onRequestClose={() => {
+        onRequestClose={() => { 
           Alert.alert('Modal has been closed.');
-          setIsVisible(!isVisible);
+          setIsVisible(false);
         }}>
 
 
 
-        <View style={styles.centeredView}>{/*this is the container for the modal*/}
-          <View style={styles.modalView}>{/*this is the container for the modal*/}
+        <Pressable onPress={wholeModal} style={styles.centeredView}>{/*this is the container for the modal*/}
+          <Pressable style={styles.modalView}>{/*this is the container for the modal*/}
             <Pressable
               style={[styles.button, styles.buttonClose]}
               onPress={closeModal}>
@@ -68,8 +77,8 @@ const UserSignModal = ({props}: {props: any} ) => {
 
               </View>
 
-          </View>
-        </View>
+          </Pressable>
+        </Pressable>
       </Modal>
       );
 };
@@ -107,8 +116,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     alignContent: 'center',
-    borderWidth: 1,
-    backgroundColor: 'lightblue',
     borderRadius: 50,
     padding: '5%',
   },
@@ -120,11 +127,13 @@ const styles = StyleSheet.create({
     alignContent: 'center',
   },
 
-  signInButton:{
+    signInButton:{
     backgroundColor: '#2196F3',
     borderRadius: 20,
     padding: 10,
     elevation: 2,
+    minWidth: '80%',
+
   },
 
 

@@ -1,6 +1,7 @@
-import { View, Text, Image, ScrollView, SafeAreaView, StyleSheet, StatusBar } from 'react-native'
+import { View, Text, Image, ScrollView, SafeAreaView, StyleSheet, StatusBar,useWindowDimensions, TouchableOpacity } from 'react-native'
 import React, { useEffect } from 'react'
 import { Link,useLocalSearchParams, useGlobalSearchParams, router, useNavigation } from 'expo-router';
+import Carousel from 'react-native-snap-carousel';
 
 
 
@@ -41,6 +42,77 @@ const userData:any=[
         name: "John Doe",
         msgs:msgs
     },
+    {
+        name: "John Doe",
+        msgs:msgs
+    },
+    {
+        name: "John Doe",
+        msgs:msgs
+    },
+    {
+        name: "John Doe",
+        msgs:msgs
+    },
+    {
+        name: "John Doe",
+        msgs:msgs
+    },
+    {
+        name: "John Doe",
+        msgs:msgs
+    },
+    {
+        name: "John Doe",
+        msgs:msgs
+    },
+    {
+        name: "John Doe",
+        msgs:msgs
+    },
+]
+
+const friendsArr = [
+  {
+    name: "John Doe",
+    image: require('../../assets/icons/profile_image.png'),
+  },
+  {
+    name: "John Doe",
+    image: require('../../assets/icons/profile_image.png'),
+  },
+  {
+    name: "John Doe",
+    image: require('../../assets/icons/profile_image.png'),
+  },
+  {
+    name: "John Doe",
+    image: require('../../assets/icons/profile_image.png'),
+  },
+  {
+    name: "John Doe",
+    image: require('../../assets/icons/profile_image.png'),
+  },
+  {
+    name: "John Doe",
+    image: require('../../assets/icons/profile_image.png'),
+  },
+  {
+    name: "John Doe",
+    image: require('../../assets/icons/profile_image.png'),
+  },
+  {
+    name: "John Doe",
+    image: require('../../assets/icons/profile_image.png'),
+  },
+  {
+    name: "John Doe",
+    image: require('../../assets/icons/profile_image.png'),
+  },
+  {
+    name: "John Doe",
+    image: require('../../assets/icons/profile_image.png'),
+  },
 ]
 
 
@@ -53,7 +125,26 @@ const ContactsPage = () => {
     console.log("ContactsPage")
 
     const mapNavigation = useNavigation();
+    const {height, width} = useWindowDimensions();
 
+    
+    const contactsPressed = () =>{
+      console.log("contacts pressed")
+      mapNavigation.navigate('components/ContactsPage',{token: "whatatoken"});
+
+    }
+
+    const profilePressed = () => {
+      console.log("profile PRESSED")
+
+      mapNavigation.navigate('UserProfile',{token: "whatatoken"});
+    }
+
+    const mapPressed = () =>{
+      console.log('map pressed')
+      mapNavigation.navigate('index',{token: "whatatoken"});
+
+    }
   
     useEffect(() => {
 
@@ -63,24 +154,23 @@ const ContactsPage = () => {
   
           header : () => (
             <View style={styles.profileButtons}> 
-             <Link href="/UserProfile" style={styles.profileButton}>
-              <View style={styles.profileButtonImg}>
-              <Image source={require('../../assets/icons/profile_image.png')} style={styles.highButtonImg}/>
-              </View>
-              </Link>
+             <TouchableOpacity onPress={profilePressed} style={styles.profileButton}>
+            <View style={styles.profileButtonImg}>
+            <Image source={require('../../assets/icons/profile_image.png')} style={styles.highButtonImg}/>
+            </View>
+            </TouchableOpacity>
            
-              <Link href="/" style={[styles.profileButton]}>
-              <Image source={require('../../assets/icons/map_icon.png')} style={styles.highButtonImg}/>
-              </Link>
+            <TouchableOpacity onPress={mapPressed} style={styles.profileButton}>
+            <View style={[styles.profileButtonImg]}>
+            <Image source={require('../../assets/icons/map_icon.png')} style={styles.highButtonImg}/>
+            </View>
+            </TouchableOpacity>
              
-             <Link href={{
-                pathname: "/components/ContactsPage",
-                params: {data: "sms"}
-             }} style={styles.profileButton}>
-              <View style={styles.profileButtonImg}>
-              <Image source={require('../../assets/icons/conversation_icon.png')} style={[styles.highButtonImg, styles.highlightedButton]}/>
-              </View>
-              </Link>
+              <TouchableOpacity onPress={contactsPressed} style={styles.profileButton}>
+            <View style={[styles.profileButtonImg, styles.highlightedButton]}>
+            <Image source={require('../../assets/icons/conversation_icon.png')} style={styles.highButtonImg}/>
+            </View>
+            </TouchableOpacity>
             </View>
           ),
           
@@ -89,7 +179,11 @@ const ContactsPage = () => {
       , []);
   
   
-
+const item = ({item, index}:{item:any, index:number}) => {
+  return (
+      <Image source={item.image} style={{width: 60, height: 60, borderRadius: 100, margin: 10, marginVertical:10}} />
+  )
+}
 
 
 
@@ -99,17 +193,31 @@ const ContactsPage = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-    <ScrollView style={styles.scrollView}>
+
+      <View style={styles.header}>
+                <Carousel
+                              layout={'default'}
+                              data={friendsArr}
+                              renderItem={item}
+                              sliderWidth={width}
+                              itemWidth={70}
+                              loop={true}
+                              contentContainerCustomStyle={styles.carouselConti}
+                          />
+        </View>
+        
+      
+    <ScrollView contentContainerStyle={styles.scrollViewConti} style={styles.scrollView}>
 
         {
             userData.map((user:any)=>{
                 return (
-                    <Link
-                    key={user._id}
-                      href ={{
-                        pathname: '/components/ChatPage',
-                        params: params
-                    }} 
+                    <TouchableOpacity
+                    key={user}
+                    onPress={() => {
+                        mapNavigation.navigate('components/ChatPage', { user: user })
+                    }
+                    }
                      style={styles.contactContilink}>
 
                         <View style={styles.contactConti}>
@@ -117,7 +225,7 @@ const ContactsPage = () => {
                         <Text style={styles.text}>{user.name}</Text>
 
                         </View>
-                    </Link>
+                    </TouchableOpacity>
                 )
             })
         }
@@ -128,27 +236,53 @@ const ContactsPage = () => {
 
 const styles = StyleSheet.create({
   container: {
-
+    marginTop: (StatusBar.currentHeight ?? 0) * 2,
     flex: 1,
+    backgroundColor: 'lightpink',
+  },
+  header:{
+    width: "100%",
+    height: 70,
+    marginTop: "15%",
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignContent: 'center',
+    zIndex: 3,
+    top: "9%",
   },
   scrollView: {
-    borderWidth: 1,
+    marginTop: "38%",
     backgroundColor: 'lightpink',
+    borderRadius: 10,
+  },
+  scrollViewConti:{
     display: 'flex',
     flexDirection: 'column',
-    borderRadius: 10,
-    top: StatusBar.currentHeight,  
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    alignContent: 'center',
+    padding: 10,
+    backgroundColor: 'lightpink',
   },
   text: {
     fontSize: 22,
     margin: 10,
     textAlign: 'left',
   },
+  carouselConti:{
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignContent: 'center',
+    backgroundColor: 'white',
+    borderRadius: 100,
+
+},
   contactContilink:{
     height: 50,
+    width: '90%',
     display: 'flex',
     margin: 10,
-    flex: 1,
     },
   contactConti:{
     borderWidth: 1,
@@ -214,14 +348,20 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
     
       },
+
+      friendCircle:{
+        flex: 1,
+        borderWidth: 1,
+      },
     
       highlightedButton:{
-        borderWidth: 2,
+        borderWidth: 3,
         borderColor: "lightgreen",
         shadowColor: 'gray',
         shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.9,
         shadowRadius: 7,
+        borderRadius: 100,
     
       },
     

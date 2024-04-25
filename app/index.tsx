@@ -12,34 +12,7 @@ import axios, { AxiosResponse } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import UserSignModal from './components/UserSignModal';
 import UserContextComponent  from './context/UserContextComponent';
-
-
-
-
-
-const storeData = async (token: string) => {
-  console.log("store token");
-  
-  console.log(token);
-  try {
-    await AsyncStorage.setItem('meetUpToken', token);
-  } catch (error) {
-    // Error saving data
-    console.log(error);
-  }
-}
-
-
-const deleteData = async(tokenName: string)=>{
-  console.log("delete")
-  try{
-    await AsyncStorage.removeItem(tokenName)
-  } catch(error){
-    console.log(error);
-  }
-}
-
-
+import loadingGif from '../assets/gif/town_loading_gif.gif';
 
 
 
@@ -47,195 +20,254 @@ const deleteData = async(tokenName: string)=>{
 
 const statusBarHeight =StatusBar.currentHeight
 
-
+var temparray:any = [];
 
 
 const custom_map_style =[
   {
-    "featureType": "landscape",
-    "stylers": [
-      {
-        "color": "#f9ddc5"
-      },
-      {
-        "lightness": -7
-      }
-    ]
+      "featureType": "all",
+      "elementType": "labels",
+      "stylers": [
+          {
+              "visibility": "off"
+          },
+          {
+              "color": "#585858"
+          }
+      ]
   },
   {
-    "featureType": "poi",
-    "elementType": "labels",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
+      "featureType": "all",
+      "elementType": "labels.text",
+      "stylers": [
+          {
+              "visibility": "simplified"
+          },
+          {
+              "color": "#d10707"
+          }
+      ]
   },
   {
-    "featureType": "poi.government",
-    "stylers": [
-      {
-        "color": "#9e5916"
-      },
-      {
-        "lightness": 46
-      }
-    ]
+      "featureType": "all",
+      "elementType": "labels.text.fill",
+      "stylers": [
+          {
+              "color": "#595050"
+          },
+          {
+              "lightness": "-32"
+          }
+      ]
   },
   {
-    "featureType": "poi.medical",
-    "elementType": "geometry.fill",
-    "stylers": [
-      {
-        "color": "#813033"
-      },
-      {
-        "lightness": 38
-      },
-      {
-        "visibility": "off"
-      }
-    ]
+      "featureType": "all",
+      "elementType": "labels.text.stroke",
+      "stylers": [
+          {
+              "color": "#ffffff"
+          }
+      ]
   },
   {
-    "featureType": "poi.park",
-    "stylers": [
-      {
-        "color": "#645c20"
-      },
-      {
-        "lightness": 39
-      }
-    ]
+      "featureType": "landscape",
+      "elementType": "all",
+      "stylers": [
+          {
+              "color": "#f9ddc5"
+          },
+          {
+              "lightness": -7
+          }
+      ]
   },
   {
-    "featureType": "poi.school",
-    "stylers": [
-      {
-        "color": "#a95521"
-      },
-      {
-        "lightness": 35
-      }
-    ]
+      "featureType": "poi.business",
+      "elementType": "all",
+      "stylers": [
+          {
+              "color": "#645c20"
+          },
+          {
+              "lightness": 38
+          }
+      ]
   },
   {
-    "featureType": "poi.sports_complex",
-    "stylers": [
-      {
-        "color": "#9e5916"
-      },
-      {
-        "lightness": 32
-      }
-    ]
+      "featureType": "poi.government",
+      "elementType": "all",
+      "stylers": [
+          {
+              "color": "#9e5916"
+          },
+          {
+              "lightness": 46
+          }
+      ]
   },
   {
-    "featureType": "road",
-    "stylers": [
-      {
-        "color": "#813033"
-      },
-      {
-        "lightness": 43
-      }
-    ]
+      "featureType": "poi.medical",
+      "elementType": "geometry.fill",
+      "stylers": [
+          {
+              "color": "#813033"
+          },
+          {
+              "lightness": 38
+          },
+          {
+              "visibility": "off"
+          }
+      ]
   },
   {
-    "featureType": "road",
-    "elementType": "labels",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
+      "featureType": "poi.park",
+      "elementType": "all",
+      "stylers": [
+          {
+              "color": "#645c20"
+          },
+          {
+              "lightness": 39
+          }
+      ]
   },
   {
-    "featureType": "road.local",
-    "elementType": "geometry.fill",
-    "stylers": [
-      {
-        "color": "#f19f53"
-      },
-      {
-        "lightness": 16
-      },
-      {
-        "visibility": "on"
-      },
-      {
-        "weight": 1.3
-      }
-    ]
+      "featureType": "poi.school",
+      "elementType": "all",
+      "stylers": [
+          {
+              "color": "#a95521"
+          },
+          {
+              "lightness": 35
+          }
+      ]
   },
   {
-    "featureType": "road.local",
-    "elementType": "geometry.stroke",
-    "stylers": [
-      {
-        "color": "#f19f53"
-      },
-      {
-        "lightness": -10
-      }
-    ]
+      "featureType": "poi.sports_complex",
+      "elementType": "all",
+      "stylers": [
+          {
+              "color": "#9e5916"
+          },
+          {
+              "lightness": 32
+          }
+      ]
   },
   {
-    "featureType": "transit",
-    "stylers": [
-      {
-        "lightness": 38
-      }
-    ]
+      "featureType": "road",
+      "elementType": "all",
+      "stylers": [
+          {
+              "color": "#813033"
+          },
+          {
+              "lightness": 43
+          }
+      ]
   },
   {
-    "featureType": "transit",
-    "elementType": "labels",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
+      "featureType": "road",
+      "elementType": "labels",
+      "stylers": [
+          {
+              "hue": "#4100ff"
+          },
+          {
+              "saturation": "62"
+          },
+          {
+              "lightness": "-37"
+          },
+          {
+              "weight": "1.96"
+          }
+      ]
   },
   {
-    "featureType": "transit.line",
-    "stylers": [
-      {
-        "color": "#813033"
-      },
-      {
-        "lightness": 22
-      }
-    ]
+      "featureType": "road.local",
+      "elementType": "geometry.fill",
+      "stylers": [
+          {
+              "color": "#f19f53"
+          },
+          {
+              "weight": 1.3
+          },
+          {
+              "visibility": "on"
+          },
+          {
+              "lightness": 16
+          }
+      ]
   },
   {
-    "featureType": "transit.station",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
+      "featureType": "road.local",
+      "elementType": "geometry.stroke",
+      "stylers": [
+          {
+              "color": "#f19f53"
+          },
+          {
+              "lightness": -10
+          }
+      ]
   },
   {
-    "featureType": "water",
-    "stylers": [
-      {
-        "color": "#1994bf"
-      },
-      {
-        "saturation": -69
-      },
-      {
-        "lightness": 43
-      },
-      {
-        "gamma": 0.99
-      }
-    ]
+      "featureType": "transit",
+      "elementType": "all",
+      "stylers": [
+          {
+              "lightness": 38
+          }
+      ]
+  },
+  {
+      "featureType": "transit.line",
+      "elementType": "all",
+      "stylers": [
+          {
+              "color": "#813033"
+          },
+          {
+              "lightness": 22
+          }
+      ]
+  },
+  {
+      "featureType": "transit.station",
+      "elementType": "all",
+      "stylers": [
+          {
+              "visibility": "off"
+          }
+      ]
+  },
+  {
+      "featureType": "water",
+      "elementType": "all",
+      "stylers": [
+          {
+              "color": "#1994bf"
+          },
+          {
+              "saturation": -69
+          },
+          {
+              "gamma": 0.99
+          },
+          {
+              "lightness": 43
+          }
+      ]
   }
 ]
 
 //region of israel
+
 
 let initialRegion = {
     latitude: 31.0461,
@@ -251,44 +283,58 @@ let initialRegion = {
 
 
  
-    const miniLocationsStart = [
-      {
-        Index:1,
-        latlng: {
-          latitude: 32.0489241225874,
-          longitude: 34.75486787299215,
-        },
-        title: "title1",
-        description: "description",
-      },
-  
-      {
-        Index:2,
-        latlng: {
-          latitude: 32.02893207647942,
-          longitude: 34.754867902254205,
-        },
-        title: "title2",
-        description: "description",
-      },
-    ]
-    
+
 
 
 
 export default function Index({route}: {route: any}) {
 
+
+  
   const temp = route.params;
 
+  var newToken = route.params
 
-  const [token, setToken] = useState<any>()
-  const [miniLocations, setMiniLocations] = useState<Array<any>>([miniLocationsStart]);
-  const rootNavigationState = useRootNavigationState();
+
+  const [token, setToken] = useState<any>();
+  const [miniLocations, setMiniLocations] = useState<any>();
+  const rootNavigationState = useRootNavigationState()
+  const [clickCount, setClickCount] = useState(0);
+  const [tempClickCount, setTempClickCount] = useState(0);
+  const [userName, setUserName] = useState("");
+
+  
+
+  const checkToken = async () => {
+    console.log("check token")
+
+    try{
+      const value = await AsyncStorage.getItem('meetUpToken')
+      if (value !== null){
+        console.log("there is a token")
+        setToken(value);
+      }else{
+         console.log("there is no token")
+         setToken("")
+
+      }
+    }catch(error){
+      console.log("there is no token")
+      console.log(error)
+
+    }
+
+    console.log("end check token")
+  
+  }
 
 
   const [activitiesModalIsVisible, setActivitiesModalIsVisible] = useState(false);
   const [newActModalIsVisible, setNewActModalVisible] = useState(false);
   const [userSignModalIsVisible, setUserSignModalVisible] = useState(false);
+  const [modalBackCloser, setModalBackCloser] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [pointPressed, setPointPressed] = useState(false);
 
   const mapRef = useRef<any>();
 
@@ -296,13 +342,21 @@ export default function Index({route}: {route: any}) {
 
   const [errorMsg, setErrorMsg] = useState<string>();
   const [location, setLocation] = useState<any>({
-    latitude: 31.0461,
-    longitude: 34.8516,
+    latitude: 34.7563,
+    longitude: 32.0567,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
     });
+    
+    const [secLocation, setSecLocation] = useState<any>({
+      latitude: 32.056913,
+      longitude: 34.759983,
+      latitudeDelta: 0.0922,
+      longitudeDelta: 0.0421,
+      });
+    
   
-  
+
 
   const props = {
     activitiesModalIsVisible: activitiesModalIsVisible,
@@ -313,48 +367,42 @@ export default function Index({route}: {route: any}) {
     setUserSignModalVisible:setUserSignModalVisible,
     userToken:token,
     setUserToken: setToken,
+    userLocation: location,
+    
   }
+  
 
 
   
   const testC = () => {
     console.log("testC pressed");
-    console.log(token)
+    console.log(token);
+    console.log(userName)
+    console.log(miniLocations)
+   
 
    }
 
 
-  
 
-  
-
-  const headers = {
-    "Accept":"application/json, text/plain, /","Content-Type": "multipart/form-data",
-  };
-
-
-
-  const fetchEvents = async () => {
-    console.log("get events")
-
-    const response = await axios.get('https://backend-scne.onrender.com/events', { headers }).catch((err) => {
-      console.log("err")
-      console.log(err)
-    }) as AxiosResponse<any, any>;
-
-    console.log("get events res")
-    console.log(response.data[response.data.length-1])
-    setMiniLocations(response.data);
-    console.log(miniLocations[0])
+   useEffect(() => {//function block that updates every time the token changes or the route changes
     console.log("end res")
+    checkToken();
+    getAllUserLocation();
+
+
+    console.log("route")
+
+
+    if(route.params==undefined){
+      console.log("no username")
+      setUserName("new user")
+    }else{
+    setUserName(route.params.username)
+    }
+
   }
-
-
-
-   useEffect(() => {
-    console.log("end res")
-  }
-  , []);
+  , [token, route, router, miniLocations]);
 
 
   
@@ -372,31 +420,28 @@ export default function Index({route}: {route: any}) {
         return;
       }
 
-      let location = await Location.getCurrentPositionAsync({});
+      let location = await Location.getCurrentPositionAsync({}).catch((err) => {
+        console.log("err")
+        console.log(err)
+      });
       setLocation({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
         latitudeDelta: 0.0222,
         longitudeDelta: 0.0121,
       });
-    
+
+      setLoading(false);
+
 
     
     })();
   }, [location]);
 
-  let text = 'Waiting..';
-  if (errorMsg) {
-    text = errorMsg;
-  } else if (location) {
-    text = JSON.stringify(location);
-
-
-  } 
 
     const addNewEvent = () => {
       console.log("add new event");
-      mapNavigation.navigate('CreateEventPage',{token123: "whatatoken"});
+      mapNavigation.navigate('CreateEventPage',{token: token});
       if(!token){
       
       }else{
@@ -407,7 +452,7 @@ export default function Index({route}: {route: any}) {
 
     const findeMeClicked = () => () => {
       console.log("set location");
-
+      clicking();
 
       console.log(token);
       mapRef.current.animateToRegion(location, 1000);      
@@ -420,50 +465,44 @@ export default function Index({route}: {route: any}) {
     const loginPressed = () => {
       console.log("login pressed");
       setUserSignModalVisible(!userSignModalIsVisible)
+      //send the user location to the setUserSignModal
+      setModalBackCloser(true);
+
     }
 
     const contactsPressed = () =>{
       console.log("contacts pressed")
-      mapNavigation.navigate('ContactsPage',{token: "whatatoken"});
+      clicking();
+      mapNavigation.navigate('components/ContactsPage',{token: token, userName: userName});
 
     }
 
     const profilePressed = () => {
       console.log("profile PRESSED")
+      clicking();
 
-      mapNavigation.navigate('UserProfile',{token: "whatatoken"});
+      mapNavigation.navigate('UserProfile',{token: token, userName: userName});
     }
 
     const mapPressed = () =>{
       console.log('map pressed')
-      mapNavigation.navigate('index',{token: "whatatoken"});
+      clicking();
+
+      mapNavigation.navigate('index',{token: token, userName: userName});
 
     }
+    
+
+
 
     useEffect(() => {
 
 
-      console.log("use1");
-      getData().then((value) => {
-        setToken(value);
-        console.log("use2");
-        console.log(value);
-      }
-      ).catch((error) => {
-        console.log(error);
-      }
-      )
-
-      
-       //if user is not logged in show sighin modal
-     if(token==null){
-      console.log(token)
+      console.log("heade bar set");
+   
 
 
-      console.log("use3");
-
-      setUserSignModalVisible(true)
-    }
+    
 
     
       mapNavigation.setOptions({
@@ -480,23 +519,23 @@ export default function Index({route}: {route: any}) {
             </TouchableOpacity>
           }
           {token &&
-            <Link href="/UserProfile" style={styles.profileButton}>
+            <TouchableOpacity onPress={profilePressed} style={styles.profileButton}>
             <View style={styles.profileButtonImg}>
             <Image source={require('../assets/icons/profile_image.png')} style={styles.highButtonImg}/>
             </View>
-            </Link>
+            </TouchableOpacity>
           }
-            <Pressable onPress={mapPressed} style={styles.profileButton}>
+            <TouchableOpacity onPress={mapPressed} style={styles.profileButton}>
             <View style={[styles.profileButtonImg, styles.highlightedButton]}>
             <Image source={require('../assets/icons/map_icon.png')} style={styles.highButtonImg}/>
             </View>
-            </Pressable>
+            </TouchableOpacity>
            
-           <Pressable onPress={contactsPressed} style={styles.profileButton}>
+           <TouchableOpacity onPress={contactsPressed} style={styles.profileButton}>
             <View style={styles.profileButtonImg}>
             <Image source={require('../assets/icons/conversation_icon.png')} style={styles.highButtonImg}/>
             </View>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         ),
         
@@ -505,6 +544,80 @@ export default function Index({route}: {route: any}) {
     , [token]);
 
         
+
+  const getAllUserLocation = () =>{
+    console.log("get all user location")
+
+    axios.get('https://m33t.app/users/get_all_locations', {
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + token,
+        }
+
+      }).then((response) => {
+      console.log("all locations response")
+      console.log(response.data)
+      //transfer dictionary to array
+      temparray = []
+      for(let key in response.data){
+        console.log(key)
+        console.log(response.data[key])
+        response.data[key].push(key)
+        console.log(response.data[key])
+        temparray.push(response.data[key])
+      }
+      console.log("temparray")
+      
+      console.log(temparray)
+
+      setMiniLocations(temparray)
+      console.log("mini locations")
+      console.log(miniLocations)
+      }
+    ).catch((error) => {
+      console.log("error")
+      console.log(error.response)
+    }
+    )
+    
+}
+
+const sendUserLocation = () =>{
+    console.log("send user location")
+
+    console.log(location)
+    console.log(typeof(location.latitude))
+    console.log(token)
+    
+
+    axios.post('https://m33t.app/users/update_user_location', {
+      lat: (location.latitude),
+      alt: (location.longitude),
+    },
+    {
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + token,
+        }
+      }).then((response) => {
+      console.log("response")
+      console.log(response.data)
+    }
+    ).catch((error) => {
+      console.log("error")
+      console.log(error.response)
+    })
+}
+
+const sendServerData = () =>{
+    console.log("send server data")
+    getAllUserLocation()
+    sendUserLocation()
+}
+
+
 
     const modalPress = () => {
       console.log("modal pressed1");
@@ -515,15 +628,27 @@ export default function Index({route}: {route: any}) {
     const activitiesPressed = () => {
       console.log("activities pressed");
       setActivitiesModalIsVisible(true);
+      clicking();
 
+    }
+
+    const modalBackCloserPressed = () => {
+      console.log("modal back closer pressed");
+      setUserSignModalVisible(false);
+      setModalBackCloser(false);
     }
 
     const markerPressed = () => {
       console.log("marker pressed");
+      setPointPressed(!pointPressed);
+      console.log(pointPressed);
+      clicking();
     }
 
-    const testB = () => {
-      console.log("testB pressed");
+    const moodSetPressed = () => {
+      console.log("moodSetPressed pressed");
+      clicking();
+      mapNavigation.navigate('MoodSet',{token: token});
     }
 
     
@@ -531,117 +656,115 @@ const getData = async () => {
   try {
     const value = await AsyncStorage.getItem('meetUpToken')
     if(value !== null) {
+      console.log("there is a token")
       console.log(value);
+      setToken(value);
       return value;
     }
   } catch(error) {
+    console.log('there is no token');
     console.log(error);
+    temp.token = null;
+
   }
 }
 
 
+useEffect(() => {
+  console.log("use effect")
+  console.log(clickCount, tempClickCount)
+  if(clickCount > tempClickCount+5){
+    console.log("click count")
+    sendServerData();
+    setTempClickCount(clickCount);
+  }
+
+}, [clickCount]);
 
 
 
+const clicking = () => {
+  console.log("clicking")
+  setClickCount(clickCount+1);
+}
     
-
-    
+//if the loading is true show the loading screen
+    if(loading){
+      return(
+        <View style={styles.loadingScreen}>
+          <Image source={loadingGif} style={styles.loadingScreen}/>
+          <Text style={styles.LoadingText}>loading...</Text>
+          
+        </View>
+      )
+    }
 
   return (
-      
-    
-      
-
     <View style={styles.container}>
-       <UserContextComponent props={props}/>
+      <NewActModal props={props} />
+      <ActivitiesModal props={props} />
+      <UserSignModal props={props} />
 
-      <NewActModal props={props}/>
-      <ActivitiesModal props={props}/>
-      <UserSignModal props={props}/>
-
-
-      <MapView 
-      style={styles.map}
-      provider={PROVIDER_GOOGLE}
-      initialRegion={location}
-      ref={mapRef}
-      
-      customMapStyle={custom_map_style}
-      
-      >
-
-        <Marker
-        coordinate={location}
-        title={"title"}
-        description={"description"}
-        onPress={markerPressed}
-        >
-
-        <Image source={require('../assets/icons/man_icon.png')} style={styles.markerImg}/>
-
-        </Marker>
-
-
-    
-
-        {
-          miniLocations.map((marker:any, index:any) => (
-            <Marker
-              key={index}
-              coordinate={{ latitude: marker[5]? marker[5]:0, longitude: marker[6]? marker[6]:0}}
-              title={marker.title}
-              description={marker.description}
-              onPress={markerPressed}
-            />
-          )
-          )
-        }
-
-
-      </MapView>
-
-      {/* end of the map elemnt
-      start of the buttons and app functionality
-      
-      */}
-      <View style={styles.appFunctionality}>
       <View style={styles.sideButtons}>
         <TouchableOpacity onPress={findeMeClicked()} style={styles.sideButtonsButton}>
           <View style={styles.sideButtonsButtonImg}>
-            <Image source={require('../assets/icons/location_icon.png')} style={styles.sideButtonImg}/>
+            <Image source={require('../assets/icons/location_icon.png')} style={styles.sideButtonImg} />
           </View>
         </TouchableOpacity>
         <TouchableOpacity onPress={testC} style={styles.sideButtonsButton}>
           <View style={styles.sideButtonsButtonImg}>
-            <Image source={require('../assets/icons/info_icon.png')} style={styles.sideButtonImg}/>
+            <Image source={require('../assets/icons/info_icon.png')} style={styles.sideButtonImg} />
           </View>
         </TouchableOpacity>
+      </View>
 
-
-        </View>
-      
       <View style={styles.lowerButtons}>
-        <TouchableOpacity  onPress={testB}style={styles.lowerButton}>
-        <View style={styles.lowerButtonImg}>
-            <Image source={require('../assets/icons/activity_icon.png')} style={styles.imgContainer}/>
+        <TouchableOpacity onPress={moodSetPressed} style={styles.lowerButton}>
+          <View style={styles.lowerButtonImg}>
+            <Image source={require('../assets/icons/mood_icon.png')} style={styles.imgContainer} />
           </View>
-          
-          </TouchableOpacity>
+        </TouchableOpacity>
         <TouchableOpacity onPress={addNewEvent} style={[styles.lowerButton, styles.lowerButtonMid]}>
-        <View style={styles.lowerButtonImg}>
-            <Image source={require('../assets/icons/plus_icon.png')} style={styles.imgContainer}/>
+          <View style={styles.lowerButtonImg}>
+            <Image source={require('../assets/icons/plus_icon.png')} style={styles.imgContainer} />
           </View>
-       
         </TouchableOpacity>
         <TouchableOpacity onPress={activitiesPressed} style={styles.lowerButton}>
-        <View style={styles.lowerButtonImg}>
-            <Image source={require('../assets/icons/activity_icon.png')} style={styles.imgContainer}/>
+          <View style={styles.lowerButtonImg}>
+            <Image source={require('../assets/icons/activity_icon.png')} style={styles.imgContainer} />
           </View>
-          
         </TouchableOpacity>
+      </View>
 
-        </View>
-    </View>
+      <View style={styles.mapStabilizer}>
+        <MapView
+          style={styles.map}
+          provider={PROVIDER_GOOGLE}
+          initialRegion={location}
+          customMapStyle={custom_map_style}
+          ref={mapRef}
+          
+        >
+         
+
+
+      
+
+
+          {miniLocations &&
+            miniLocations.map((location: any) => (
+              <Marker
+                coordinate={{ latitude: location[0][0], longitude: location[0][1] }}
+                title={location[2]}
+                description={"description"}
+                onPress={markerPressed}
+                key={location[2]}
+              >
+                <Image source={require('../assets/icons/man_icon.png')} style={styles.markerImg} />
+              </Marker>
+            ))}
+        </MapView>
+      </View>
     </View>
   );
 }
@@ -649,6 +772,30 @@ const getData = async () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+
+  loadingScreen:{
+    flex: 1,
+    justifyContent: 'center',
+    alignContent: 'center',
+    alignItems: 'center',
+  },
+  loadingGif:{
+    resizeMode: 'contain',
+    height: 200,
+    width: 200,
+  },
+
+  LoadingText:{
+    fontSize: 20,
+  },
+
+  mapStabilizer:{
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'transparent',
+    position: 'absolute',
+    zIndex: 0,
   },
   map: {
     width: '100%',
@@ -659,6 +806,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     height: 40,
     width: 40,
+    zIndex: 4,
     
   },
 
@@ -677,15 +825,17 @@ const styles = StyleSheet.create({
   },
 
   sideButtons:{
+    position: 'absolute',
+    bottom:200,
     width: 65,
     height: 150,
-  
     borderRadius: 40,
     display: 'flex',
     justifyContent: 'space-around',
     alignContent: 'center',
     alignItems: 'center',
     alignSelf: 'flex-end',
+    zIndex: 1,
   },
 
   appFunctionality:{
@@ -697,6 +847,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignContent: 'center',
     alignItems: 'center',
+    zIndex: 1,
+    borderWidth: 1,
   },
 
   sideButtonsButton:{
@@ -714,9 +866,9 @@ const styles = StyleSheet.create({
   },
 
   lowerButtons:{
-    backgroundColor: 'white',
-    width: '90%',
-    opacity: 0.9,
+    position: 'absolute',
+    backgroundColor: 'rgba(255, 255, 255, 0.75)',
+    width: '95%',
     height: 80,
     borderRadius: 20,
     display: 'flex',
@@ -724,6 +876,9 @@ const styles = StyleSheet.create({
     alignContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
+    zIndex: 1,
+    bottom: "5%",
+    alignSelf: 'center',
   
   },
   lowerButton:{
@@ -767,7 +922,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'lightgreen',
+    backgroundColor: '#C5D9E2',
     opacity: 1,
     //make some shadow
     shadowColor: 'gray',
@@ -811,12 +966,13 @@ const styles = StyleSheet.create({
   },
 
   highlightedButton:{
-    borderWidth: 2,
+    borderWidth: 4,
+    borderRadius: 100,
+
     borderColor: "lightgreen",
     shadowColor: 'gray',
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.9,
-    borderRadius: 100,
     shadowRadius: 7,
 
   },
@@ -830,4 +986,19 @@ const styles = StyleSheet.create({
   },
 
 
+  modalBackCloserCS:{
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'black',
+    opacity: 0.5,
+    zIndex: 1,
+  },
+
+
 });
+
+  function coponentDidUnmount(arg0: () => React.JSX.Element) {
+    throw new Error('Function not implemented.');
+  }
+
