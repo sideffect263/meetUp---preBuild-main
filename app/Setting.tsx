@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text,Image, TextInput, TouchableOpacity,useWindowDimensions,  StyleSheet, ImageBackground,ScrollView, SafeAreaView, StatusBar, Pressable } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Carousel from 'react-native-snap-carousel';
+import axios from 'axios';
 
 
 const statusBarHeight =StatusBar.currentHeight
@@ -45,6 +46,26 @@ const Setting = ({route}: {route: any},{navigation}:{navigation:any}) => {
     const nextScreen = (selectedEmote=null) => {
         console.log('Next Screen');
         mapNavigation.navigate('MoodRefine', {selectedEmote});
+    }
+
+    const deleteUser = () => {
+        console.log('Delete User');
+        axios.delete('https://m33t.app/users/delete?user_id=661fe401b2b26b9109c5aa33', {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token,
+            }
+        }).then((response) => {
+            console.log(response);
+            mapNavigation.navigate('index');
+        }
+        ).catch((error) => {
+            console.log(error.response.data);
+        });
+
+        
+        mapNavigation.navigate('index');
     }
       
     return (
@@ -95,9 +116,9 @@ const Setting = ({route}: {route: any},{navigation}:{navigation:any}) => {
                                 </TouchableOpacity>
                                 </View>
 
-                                <Pressable style={styles.logOutConti}>
+                                <Pressable onPress={deleteUser} style={styles.logOutConti}>
                                     <Image source={require('../assets/icons/logout_icon.png')}  style={{height: 30, width: 30, resizeMode: 'contain', left:"10%",position:'absolute'}} />
-                                    <Text style={styles.whiteText}>Log Out</Text>
+                                    <Text style={styles.whiteText}>Delete user</Text>
                                     </Pressable>
 
 

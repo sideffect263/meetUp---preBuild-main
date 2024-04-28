@@ -182,6 +182,7 @@ const MoodSet = ({route}: {route: any},{navigation}:{navigation:any}) => {
                     item.styleSwicher = false;
                 })
 
+                
                 console.log(moodData[newIndex].styleSwicher)
 
         

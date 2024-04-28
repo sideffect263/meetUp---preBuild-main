@@ -13,6 +13,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import UserSignModal from './components/UserSignModal';
 import UserContextComponent  from './context/UserContextComponent';
 import loadingGif from '../assets/gif/town_loading_gif.gif';
+import HelpModal from './components/HelpModal';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 
 
@@ -298,10 +300,12 @@ export default function Index({route}: {route: any}) {
 
   const [token, setToken] = useState<any>();
   const [miniLocations, setMiniLocations] = useState<any>();
+  const [eventLocations, setEventLocations] = useState<any>();
   const rootNavigationState = useRootNavigationState()
   const [clickCount, setClickCount] = useState(0);
   const [tempClickCount, setTempClickCount] = useState(0);
   const [userName, setUserName] = useState("");
+  const [userId, setUserId] = useState();
 
   
 
@@ -313,6 +317,22 @@ export default function Index({route}: {route: any}) {
       if (value !== null){
         console.log("there is a token")
         setToken(value);
+        axios.get('https://m33t.app/users/get_user_jwt', {
+          headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Bearer ' + token,
+          }
+        }).then((response) => {
+          console.log("response")
+          console.log(response.data)
+          setUserName(response.data.name)
+          setUserId(response.data._id)
+        }).catch((error) => {
+          console.log("error")
+          console.log(error.response)
+        }
+        )
       }else{
          console.log("there is no token")
          setToken("")
@@ -333,8 +353,10 @@ export default function Index({route}: {route: any}) {
   const [newActModalIsVisible, setNewActModalVisible] = useState(false);
   const [userSignModalIsVisible, setUserSignModalVisible] = useState(false);
   const [modalBackCloser, setModalBackCloser] = useState(false);
+  const [helpModalIsVisible, setHelpModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [pointPressed, setPointPressed] = useState(false);
+  const [serverDataCounter, setServerDataCounter] = useState(0);
 
   const mapRef = useRef<any>();
 
@@ -365,6 +387,8 @@ export default function Index({route}: {route: any}) {
     setNewActModalVisible: setNewActModalVisible,
     userSignModalIsVisible:userSignModalIsVisible,
     setUserSignModalVisible:setUserSignModalVisible,
+    helpModalIsVisible: helpModalIsVisible,
+    setHelpModalVisible: setHelpModalVisible,
     userToken:token,
     setUserToken: setToken,
     userLocation: location,
@@ -377,9 +401,10 @@ export default function Index({route}: {route: any}) {
   const testC = () => {
     console.log("testC pressed");
     console.log(token);
-    console.log(userName)
-    console.log(miniLocations)
-   
+    getAllEventsLocations();
+    console.log(userName) 
+    console.log(eventLocations)
+    setHelpModalVisible(!helpModalIsVisible);  
 
    }
 
@@ -388,17 +413,34 @@ export default function Index({route}: {route: any}) {
    useEffect(() => {//function block that updates every time the token changes or the route changes
     console.log("end res")
     checkToken();
-    getAllUserLocation();
+    console.log(serverDataCounter)
 
+  
 
     console.log("route")
 
 
+
     if(route.params==undefined){
       console.log("no username")
-      setUserName("new user")
+      setUserName("")
     }else{
     setUserName(route.params.username)
+    console.log("username")
+    console.log(userName)
+    if(token){//only sends and receives data if the user is logged in
+      if(serverDataCounter<2){//meant to slow down the data sending
+            getAllUserLocation();
+            getAllEventsLocations();
+            setServerDataCounter(serverDataCounter+1);
+      }else{
+        setServerDataCounter(serverDataCounter+1);
+        if(serverDataCounter>10){
+          setServerDataCounter(0);
+        }
+      }
+    }
+      
     }
 
   }
@@ -441,9 +483,9 @@ export default function Index({route}: {route: any}) {
 
     const addNewEvent = () => {
       console.log("add new event");
-      mapNavigation.navigate('CreateEventPage',{token: token});
-      if(!token){
-      
+      if(token){
+        mapNavigation.navigate('CreateEventPage',{token: token, userName: userName, location: location, userId: userId});
+
       }else{
         setUserSignModalVisible(!userSignModalIsVisible)
       }
@@ -543,7 +585,28 @@ export default function Index({route}: {route: any}) {
     }
     , [token]);
 
-        
+  const getAllEventsLocations = () => {
+    console.log("get all events locations")
+    axios.get('https://m33t.app/events/get_all', {
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + token,
+        }
+      }).then((response) => {
+      console.log("event location response")
+      console.log(response.data)
+      setEventLocations(response.data)
+
+      }
+    ).catch((error) => {
+      console.log("error")
+      console.log(error.response)
+    }
+    )
+
+
+  }
 
   const getAllUserLocation = () =>{
     console.log("get all user location")
@@ -612,9 +675,10 @@ const sendUserLocation = () =>{
 }
 
 const sendServerData = () =>{
-    console.log("send server data")
+    console.log("send and get server data")
     getAllUserLocation()
     sendUserLocation()
+    getAllEventsLocations()
 }
 
 
@@ -675,7 +739,18 @@ useEffect(() => {
   console.log(clickCount, tempClickCount)
   if(clickCount > tempClickCount+5){
     console.log("click count")
-    sendServerData();
+    if(token){//only sends and receives data if the user is logged in
+      if(serverDataCounter<2){//meant to slow down the data sending
+            sendServerData();
+            setServerDataCounter(serverDataCounter+1);
+      }else{
+        setServerDataCounter(serverDataCounter+1);
+        if(serverDataCounter>4){
+          setServerDataCounter(0);
+        }
+
+      }
+    }
     setTempClickCount(clickCount);
   }
 
@@ -704,6 +779,7 @@ const clicking = () => {
       <NewActModal props={props} />
       <ActivitiesModal props={props} />
       <UserSignModal props={props} />
+      <HelpModal props={props} />
 
       <View style={styles.sideButtons}>
         <TouchableOpacity onPress={findeMeClicked()} style={styles.sideButtonsButton}>
@@ -745,8 +821,21 @@ const clicking = () => {
           ref={mapRef}
           
         >
-         
 
+          {eventLocations &&
+            eventLocations.map((location: any) => (
+              typeof(location.lat) == "number" && typeof(location.alt) == "number" && location.name && typeof(location.tag) == "object" &&
+              <Marker
+                coordinate={{ latitude: location.lat, longitude: location.alt }}
+                title={location.name}
+                description={"description"}
+                onPress={markerPressed}
+                key={location._id}
+              >
+                <Image source={location.tag.image} style={styles.markerImg} />
+              </Marker>
+            ))
+          }
 
       
 

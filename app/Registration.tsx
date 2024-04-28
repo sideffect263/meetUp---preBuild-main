@@ -105,7 +105,7 @@ const mapNavigation = useNavigation();
 
   const tandcReadPressed = () => {
     console.log('Terms and Conditions Pressed');
-    Linking.openURL('https://m33t.app/terms');
+    Linking.openURL('https://m33t.webflow.io/q-a');
     
   }
 

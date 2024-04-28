@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import ExpandableComponent from './components/ExpandableComponent';
+import axios from 'axios';
 
 
 
@@ -82,9 +83,10 @@ const UserProfile = ({route}: {route: any}) => {
       const [userNewName, setUserNewName] = useState('');
       const [password, setPassword] = useState('');
       const [userDescription, setUserDescription] = useState('');
+      const [userImage, setUserImage] = useState(require('../assets/icons/profile_image.png'));
 
       
-  const [image, setImage] = useState<string | null>(null);
+  const [image, setImage] = useState<any>(null);
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -98,7 +100,9 @@ const UserProfile = ({route}: {route: any}) => {
     console.log(result);
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      setImage(result);
+      setUserImage({uri: result.assets[0].uri});
+      
     }
   };
 
@@ -145,9 +149,53 @@ const UserProfile = ({route}: {route: any}) => {
         console.log("edit profile pressed");
         setModalVisible(true);
       }
+      const loginSession = () => {
+        console.log("registraion session");
+        const formData = new FormData();
+        const imageData = {
+          uri: image.assets[0].uri,
+          name:image.assets[0].uri.split('/').pop(),
+          type: image.assets[0].type,
+        }
+        const blobData = new Blob([imageData.uri], { type: imageData.type });
+        formData.append('photo', blobData, imageData.name);
+        console.log(formData);
+        axios.post('https://1kmxtph7-5000.euw.devtunnels.ms/users/register', {
+          name:"alolo",
+          email:"username4@gamil.com",
+          password:"12345",
+          phone:'000000000',
+          description:"Hey ! i'm here to meet new people and have fun",
+          date_of_birth:'2000-01-01',
+          lat:50.8503,
+          alt:4.3517,
+          photo:formData,
 
+            
+        },
+        {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+            
+        })
+        .then(function (response) {
+            console.log("response");
+            console.log(response.data);
+            console.log(response.data['access_token']);
+    
+    
+        })
+        .catch(function (error) {
+          console.log(error.response.data);
+        });
+        
+    
+      }
       const saveChanges = () => {
         console.log("save changes");
+        loginSession()
         setModalVisible(false);
       }
 
@@ -161,8 +209,8 @@ const UserProfile = ({route}: {route: any}) => {
 
       
   return (
-    <View style={styles.container}>
-
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContiConti} style={styles.scrollConti}>
       <Modal
         animationType="fade"
         
@@ -185,7 +233,7 @@ const UserProfile = ({route}: {route: any}) => {
                   <View style={styles.innerModal}>
 
                   <View style={styles.profileImageChange}>
-                        <ImageBackground source={require('../assets/icons/profile_image.png')} style={styles.image}>
+                        <ImageBackground source={userImage} style={styles.image}>
 
                         <Pressable onPress={pickImage} style={styles.profileImageChangeButton}>
                           <Image source={require('../assets/icons/change_photo_icon.png')} style={styles.image}></Image>
@@ -290,7 +338,8 @@ const UserProfile = ({route}: {route: any}) => {
 
 
         </View>
-    </View>
+        </ScrollView>
+    </SafeAreaView>
   )
 }
 
